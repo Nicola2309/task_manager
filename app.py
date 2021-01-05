@@ -1,17 +1,34 @@
 import os
-from flask import Flask
+from flask import (
+    Flask, flash, render_template,
+    redirect, request, session, url_for)
+#the difference here is that the installation uses the format "flask-pymongo" the import uses "flask_pymongo" and the packet is called "PyMongo"
+from flask_pymongo import PyMongo
+#MongDB stores data in a JSON-like format called BSON, to find documents we must be able to render/retrieve the ObjectId's.
+from bson.objectid import ObjectId
 if os.path.exists("env.py"):
     import env
 
 
 app = Flask(__name__)
 
+
+app.config["MONGO_DBNAME"] = os.environ.get("MONGO_DBNAME") #This config command = GETS from env.py the database name
+app.config["MONGO_URI"] = os.environ.get("MONGO_URI") #This config command = GETS from env.py the connection string
+app.secret_key = os.environ.get("SECRET_KEY") #This secret_key command = GETS from env.py the required password to use functions from Flask
+
+mongo = PyMongo(app) # la (app) passata come attributo e' : app = Flask(__name__)
+
+
 @app.route("/")
-def hello():
-    return "Hello World ... again"
+@app.route("/get_tasks")
+def get_tasks():
+    tasks = mongo.db.tasks.find()
+    return render_template("tasks.html", tasks=tasks) #The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
 
 
 if __name__ == "__main__":
     app.run(host=os.environ.get("IP"),
             port=int(os.environ.get("PORT")),
-            debug=True) #debug value must be updated to FALSE prior to actual deployment or PROJECT SUBMISSION
+            debug=True) #debug value must be updated to FALSE prior to actual deployment or PROJECT SUBMISSION.
+#If we open accidentally the APP in more than one terminal use "pkill -9 python3" to close the app everywhere.
