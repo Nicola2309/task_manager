@@ -24,8 +24,11 @@ mongo = PyMongo(app) # la (app) passata come attributo e' : app = Flask(__name__
 @app.route("/")
 @app.route("/get_tasks")
 def get_tasks():
-    tasks = mongo.db.tasks.find()
-    return render_template("tasks.html", tasks=tasks) #The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
+    # wrapping the find() mongodb method inside a Python list() changes the CURSOR OBJECT making it a proper LIST
+    # That will solve the Jinja-repeatloops-bug explained in the 'tasks.html' page,
+    tasks = list(mongo.db.tasks.find())
+    #The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
+    return render_template("tasks.html", tasks=tasks)
 
 
 @app.route("/register", methods=["GET", "POST"])

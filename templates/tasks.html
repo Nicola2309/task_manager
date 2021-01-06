@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-
-    <h2>I am extending the base template!</h2>
-
+    <!--Jinja operates unpacking the content of a loop, so after the first loop below, 
+        the next loop considered equal will result as empty.
+    If we try to comment out the first loop to make Jinja we'll have both the loops empty, 
+    JINJA CAN STILL SEE THE NATURE OF THE COMMENTED-OUT CODE-->
     {% for task in tasks %}
         {{ task.task_name }}<br>
         {{ task.category_name }}<br>
@@ -10,5 +11,23 @@
         {{ task.is_urgent }}<br>
         {{ task.due_date }}<br>
     {% endfor %} 
+
+    <ul class="collapsible">
+        {% for task in tasks %}
+        <li>
+            <div class="collapsible-header white-text light-blue darken-4 text-shadow">
+                <i class="fas fa-caret-down"></i>
+                <strong>{{ task.task_name }}</strong> : {{ task.due_date }}
+                {% if task.is_urgent == "on" %}
+                <i class="fas fa-exclamation-circle light-blue-text text-lighten-2"></i>
+                {% endif %}
+            </div>
+            <div class="collapsible-body">
+                <strong>{{ task.category_name }}</strong>
+                <p>{{ task.task_description }}</p>
+            </div>
+        </li>
+        {% endfor %}
+  </ul>
 
 {% endblock %}
