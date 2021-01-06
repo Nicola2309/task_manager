@@ -6,6 +6,7 @@ from flask import (
 from flask_pymongo import PyMongo
 #MongDB stores data in a JSON-like format called BSON, to find documents we must be able to render/retrieve the ObjectId's.
 from bson.objectid import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash
 if os.path.exists("env.py"):
     import env
 
@@ -25,6 +26,11 @@ mongo = PyMongo(app) # la (app) passata come attributo e' : app = Flask(__name__
 def get_tasks():
     tasks = mongo.db.tasks.find()
     return render_template("tasks.html", tasks=tasks) #The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    return render_template("register.html")
 
 
 if __name__ == "__main__":
