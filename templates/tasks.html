@@ -3,14 +3,17 @@
     <!--Jinja operates unpacking the content of a loop, so after the first loop below, 
         the next loop considered equal will result as empty.
     If we try to comment out the first loop to make Jinja we'll have both the loops empty, 
-    JINJA CAN STILL SEE THE NATURE OF THE COMMENTED-OUT CODE-->
-    {% for task in tasks %}
-        {{ task.task_name }}<br>
-        {{ task.category_name }}<br>
-        {{ task.task_description }}<br>
-        {{ task.is_urgent }}<br>
-        {{ task.due_date }}<br>
-    {% endfor %} 
+    JINJA CAN STILL SEE THE NATURE OF THE COMMENTED-OUT CODE
+    "-iamextra-" its the code won't be read again, after making the Cursor Object a Python list()
+    and after ditributing its functionalities in the actual content of the page, we don't need it anymore, goodbye loyal friend-->
+    
+<!--{% for task-iamextra- in tasks-iamextra- %}
+        {{ task-iamextra-.task_name-iamextra- }}<br>
+        {{ task-iamextra-.category_name-iamextra- }}<br>
+        {{ task-iamextra-.task_description-iamextra- }}<br>
+        {{ task-iamextra-.is_urgent-iamextra- }}<br>
+        {{ task-iamextra-.due_date-iamextra- }}<br>
+    {% endfor %} -->
 
     <ul class="collapsible">
         {% for task in tasks %}
@@ -19,7 +22,8 @@
                 <i class="fas fa-caret-down"></i>
                 <strong>{{ task.task_name }}</strong> : {{ task.due_date }}
                 {% if task.is_urgent == "on" %}
-                <i class="fas fa-exclamation-circle light-blue-text text-lighten-2"></i>
+                <i class="fas fa-exclamation-circle light-blue-text text-lighten-2 tooltipped"
+                    data-position="right" data-tooltip="URGENT!"></i>
                 {% endif %}
             </div>
             <div class="collapsible-body">
