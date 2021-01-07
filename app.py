@@ -104,8 +104,22 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/add_task")
+@app.route("/add_task", methods=["GET", "POST"])
 def add_task():
+    if request.method == "POST":
+        is_urgent = "on" if request.form.get("is_urgent") else "off"
+        task = {
+            "category_name": request.form.get("category_name"),
+            "task_name": request.form.get("task_name"),
+            "task_description": request.form.get("task_description"), # If we want to retrieve an Array the correct method is 'request.form.getlist()'
+            "is_urgent": is_urgent,
+            "due_date": request.form.get("due_date"),
+            "created_by": session["user"]
+        }
+        mongo.db.tasks.insert_one(task)
+        flash("Task Successfully Added")
+        return redirect(url_for("get_tasks"))
+        
     categories = mongo.db.categories.find().sort("category_name", 1) # sorting categories by "1" displays them in numerical or alphabetical order
     return render_template("add_task.html", categories=categories)
 
