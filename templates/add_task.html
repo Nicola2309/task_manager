@@ -9,6 +9,12 @@
         <div class="row">
             <div class="input-field col s12">
                 <i class="fas fa-folder-open prefix light-blue-text text-darken-4"></i>
+                <!-- Dirty little secret in MATERIALIZE: the 'select' section gets read like a 'input' section with some custom classes and 'data-target' applied.
+                     Below the input we'll find a 'select' element and we'll see that our browser applied a 'CSS' 'display:none', if we uncheck that property we can see our 'select' element appearing without styles, they are located in the input.
+                     Materialize creates an Unordered list <ul> with a unique ID targeted to our original 'select' element, and its <li> elements with their Custom ID's that contain a <span> matching 
+                     with the <option>s below(see the DEV TOOL in Google going back to this code before the "CI source code added" commit).
+                     Using JS files the input will populate the <ul> and <li> elements based on a 'click' event listener, the 'required' attribute doesn't work in <ul>'s, adding 'required' to the input won't work either.
+                     We apply the source code, explained function per function in 'script.js'  -->
                 <select id="category_name" name="category_name" class="validate" required>
                     <option value="" disabled selected>Choose Category</option>
                     {% for category in categories %}
