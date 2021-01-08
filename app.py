@@ -92,7 +92,7 @@ def profile(username):
     if session["user"]:
         #If the session user cookies are true and active show the profile of the user, if not, redirect him to the login page
         return render_template("profile.html", username=username)
-    
+
     return redirect(url_for("login"))
 
 
@@ -136,8 +136,9 @@ def edit_task(task_id):
             "due_date": request.form.get("due_date"),
             "created_by": session["user"]
         }
-        mongo.db.tasks.update({"_id": ObjectId(task_id)},submit_edit)
+        mongo.db.tasks.update({"_id": ObjectId(task_id)}, submit_edit)
         flash("Task Successfully Updated")
+        return redirect(url_for("get_tasks"))
 
     task = mongo.db.tasks.find_one({"_id": ObjectId(task_id)})
     categories = mongo.db.categories.find().sort("category_name", 1)
@@ -153,7 +154,7 @@ def delete_task(task_id):
 
 @app.route("/get_categories")
 def get_categories():
-    categories = list(mongo.deb.categories.find().sort("category_name", 1))
+    categories = list(mongo.db.categories.find().sort("category_name", 1))
     return render_template("categories.html", categories=categories)
 
 
@@ -176,12 +177,19 @@ def edit_category(category_id):
         submit = {
             "category_name": request.form.get("category_name")
         }
-        mongo.db.categories.update({"_id": ObjectId(category_id), submit})
+        mongo.db.categories.update({"_id": ObjectId(category_id)}, submit)
         flash("Category Successfully Updated")
         return redirect(url_for("get_categories"))
-        
+
     category = mongo.db.categories.find_one({"_id": ObjectId(category_id)})
     return render_template("edit_category.html", category=category)
+
+
+@app.route("/delete_category/<category_id>")
+def delete_category(category_id):
+    mongo.db.categories.remove({"_id": ObjectId(category_id)})
+    flash("Category Successfully Deleted")
+    return redirect(url_for("get_categories"))
 
 
 if __name__ == "__main__":
