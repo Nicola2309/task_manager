@@ -2,9 +2,9 @@ import os
 from flask import (
     Flask, flash, render_template,
     redirect, request, session, url_for)
-#the difference here is that the installation uses the format "flask-pymongo" the import uses "flask_pymongo" and the packet is called "PyMongo"
+# the difference here is that the installation uses the format "flask-pymongo" the import uses "flask_pymongo" and the packet is called "PyMongo"
 from flask_pymongo import PyMongo
-#MongDB stores data in a JSON-like format called BSON, to find documents we must be able to render/retrieve the ObjectId's.
+# MongDB stores data in a JSON-like format called BSON, to find documents we must be able to render/retrieve the ObjectId's.
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 if os.path.exists("env.py"):
@@ -14,11 +14,16 @@ if os.path.exists("env.py"):
 app = Flask(__name__)
 
 
-app.config["MONGO_DBNAME"] = os.environ.get("MONGO_DBNAME") #This config command = GETS from env.py the database name
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI") #This config command = GETS from env.py the connection string
-app.secret_key = os.environ.get("SECRET_KEY") #This secret_key command = GETS from env.py the required password to use functions from Flask
+app.config["MONGO_DBNAME"] = os.environ.get("MONGO_DBNAME") # This config command = GETS from env.py the database name
+app.config["MONGO_URI"] = os.environ.get("MONGO_URI") # This config command = GETS from env.py the connection string
+app.secret_key = os.environ.get("SECRET_KEY") # This secret_key command = GETS from env.py the required password to use functions from Flask
 
 mongo = PyMongo(app) # la (app) passata come attributo e' : app = Flask(__name__)
+                     # se vogliamo aprire il 'Search Index' nella CLI, dopo aver avviato l'interprete python con il comando 'python3', sara' il comando 'from app import mongo' ad avviare la connessione tra Database, Python e App.
+                     # 'mongo.db.tasks.create_index([("task_name", "text"), ("task_descrption", "text")])' possiamo avere solo un 'Text Index' per collection, questo lo mettiamo con le tasks. I nostri user potranno ricercare le tasks in base al loro nome o descrizione
+                     # 'mongo.db.tasks.drop_indexes()' per rimuovere gli indici di ricerca
+                     # 'mongo.db.tasks.drop_index('task_name_text_task_descrption_text')' per rimuovore l'indice di ricerca creato col comando scritto sopra
+                     # 'mongo.db.tasks.index_information()' per vedere la logica di indicizzazione presente, quella di default in mongoDB e' il numero crescente degli ID:  {'_id_': {'v': 2, 'key': [('_id', 1)], 'ns': 'task_manager.tasks'}}
 
 
 @app.route("/")
@@ -27,7 +32,17 @@ def get_tasks():
     # wrapping the find() mongodb method inside a Python list() changes the CURSOR OBJECT making it a proper LIST
     # That will solve the Jinja-repeatloops-bug explained in the 'tasks.html' page,
     tasks = list(mongo.db.tasks.find())
-    #The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
+    # The light-blue 'tasks' is what the template will use, the white 'tasks' is the variable we defined in the line above.
+    return render_template("tasks.html", tasks=tasks)
+
+
+@app.route("/search", methods=["GET", "POST"])
+# creare l'indice con python permette a tutti gli user di usare la ricerca contemporaneamente, 
+# se la creassimo interna all'app crusherebbe aggiungendo nella funzione 'def.search()' 'mongo.db.tasks.create_index([("task_name", "text"), ("task_description", "text")])' le queries si legherebbero alla sessione del singolo user, e con due in contemporanea crusherebbe.
+# Check STOP words Docs of Mongo
+def search():
+    query = request.form.get("query")
+    tasks = list(mongo.db.tasks.find({"$text": {"$search": query}}))
     return render_template("tasks.html", tasks=tasks)
 
 
@@ -63,7 +78,7 @@ def login():
             {"username": request.form.get("username").lower()})
 
         if existing_user:
-            #ensure hashed password matches user input
+            # ensure hashed password matches user input
             if check_password_hash(
                 existing_user["password"], request.form.get("password")):
                     session["user"] = request.form.get("username").lower()
@@ -90,7 +105,7 @@ def profile(username):
         {"username": session["user"]})["username"]
 
     if session["user"]:
-        #If the session user cookies are true and active show the profile of the user, if not, redirect him to the login page
+        # If the session user cookies are true and active show the profile of the user, if not, redirect him to the login page
         return render_template("profile.html", username=username)
 
     return redirect(url_for("login"))
@@ -195,5 +210,5 @@ def delete_category(category_id):
 if __name__ == "__main__":
     app.run(host=os.environ.get("IP"),
             port=int(os.environ.get("PORT")),
-            debug=True) #debug value must be updated to FALSE prior to actual deployment or PROJECT SUBMISSION.
-#If we open accidentally the APP in more than one terminal use "pkill -9 python3" to close the app everywhere.
+            debug=True) # debug value must be updated to FALSE prior to actual deployment or PROJECT SUBMISSION.
+# If we open accidentally the APP in more than one terminal use "pkill -9 python3" to close the app everywhere.
